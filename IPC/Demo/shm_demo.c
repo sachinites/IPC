@@ -39,8 +39,7 @@ create_and_write_shared_memory (char *mmap_key, char *value, unsigned int size){
      * performed in shared memory which resides in kernel*/
     memset(shm_reg, 0, size);
     memcpy(shm_reg, value, size);
-
-    //munmap(shm_reg, size);
+    munmap(shm_reg, size);
     return size;
 }
 
@@ -74,5 +73,6 @@ read_from_shared_memory (char *mmap_key,
         printf("munmap failed\n");
         return -1;
     }
+    close(shm_fd);
     return bytes_to_read; /*Return the number of bytes read */
 }
