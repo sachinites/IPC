@@ -18,9 +18,11 @@
 int
 main(int argc, char **argv) {
 
+    const uint32_t page_size = getpagesize();
+
     void *vm_page_memory = mmap(
             NULL,
-            getpagesize(),
+           page_size,
             PROT_READ|PROT_WRITE|PROT_EXEC,
             MAP_ANON|MAP_PRIVATE,
             0,0);
@@ -30,10 +32,10 @@ main(int argc, char **argv) {
         return -1;
     }
 
-    printf ("VM page is allocated of size %u\n", getpagesize());
+    printf ("VM page is allocated of size %u\n", page_size);
 
     /* Lets use our allocator to further alloc/dealloc memory from this VM page */
-    allocator_init(vm_page_memory,  getpagesize());
+    allocator_init(vm_page_memory,  page_size);
 
     student_t *stud1 = (student_t *)allocator_alloc_mem(vm_page_memory, sizeof(student_t));
     strcpy((char *)stud1->name, "Abhishek");
@@ -57,9 +59,9 @@ main(int argc, char **argv) {
     vm_page_xmit_data_t *vm_page_xmit_data = (vm_page_xmit_data_t *)calloc(1, sizeof(vm_page_xmit_data_t) + getpagesize());
 
     vm_page_xmit_data->page_base_address = vm_page_memory;
-    vm_page_xmit_data->page_size = getpagesize();
+    vm_page_xmit_data->page_size = page_size;
     vm_page_xmit_data->root_address = (void *)stud1;
-    memcpy (vm_page_xmit_data->page_memory, vm_page_memory, getpagesize());
+    memcpy (vm_page_xmit_data->page_memory, vm_page_memory, page_size);
    
     /* Open a UDP socket to remote process and send VM page as it is */
     int sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -78,7 +80,7 @@ main(int argc, char **argv) {
 
     int sent_bytes = sendto(sockfd,
            vm_page_xmit_data,
-           sizeof(vm_page_xmit_data_t) + getpagesize(),
+           sizeof(vm_page_xmit_data_t) + page_size,
            0,
            (struct sockaddr *)&dest,
            sizeof(struct sockaddr));

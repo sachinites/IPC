@@ -19,6 +19,7 @@ int
 main(int argc, char **argv) {
 
     socklen_t addr_len = sizeof(struct sockaddr);
+    const uint32_t page_size = getpagesize();
 
     int sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
@@ -35,10 +36,10 @@ main(int argc, char **argv) {
 
     bind(sockfd, (struct sockaddr *)&server, sizeof(server));
 
-    size_t buffer_size = sizeof(vm_page_xmit_data_t) + getpagesize();
+    size_t buffer_size = sizeof(vm_page_xmit_data_t) + page_size;
 
     unsigned char *buffer  = 
-        (unsigned char *)calloc (1, sizeof(vm_page_xmit_data_t) + getpagesize());
+        (unsigned char *)calloc (1, sizeof(vm_page_xmit_data_t) + page_size);
 
     int recv_bytes =  recvfrom(sockfd, 
                                                 (char *)buffer, buffer_size, 0,
@@ -62,17 +63,30 @@ main(int argc, char **argv) {
         return -1;
     }
 
-    memcpy (vm_page_memory, vm_page_xmit_data->page_memory, getpagesize());
+    memcpy (vm_page_memory, vm_page_xmit_data->page_memory, page_size);
 
-    student_t *stud = (student_t *)vm_page_xmit_data->root_address;
+    student_t *stud1 = (student_t *)vm_page_xmit_data->root_address;
+    student_t *stud = stud1;
 
     while (stud) {
 
         printf ("Name = %s , Roll No = %u\n", stud->name, stud->roll_no);
         stud = stud->next;
     }
+ 
+    /* Continue to use the student linked list */
+    /* no need to invoke allocator_init() because the above memcpy do it */
+    stud =  (student_t *)allocator_alloc_mem(vm_page_memory, sizeof(student_t));
+    strcpy((char *)stud->name, "Mayank");
+    stud->roll_no = 4;
+    stud->next = NULL;
 
+    stud->next = stud1;
+
+    /* We are done release the resources */
     close (sockfd);
+
+    /* No need to free linkedlist , we destroy the entire VM page */
     munmap (vm_page_memory, vm_page_xmit_data->page_size);
     free(buffer);
     return 0;
