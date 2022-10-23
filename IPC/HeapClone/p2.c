@@ -41,7 +41,7 @@ main(int argc, char **argv) {
     unsigned char *buffer  = 
         (unsigned char *)calloc (1, sizeof(vm_page_xmit_data_t) + page_size);
 
-    int recv_bytes =  recvfrom(sockfd, 
+    int recv_bytes =  recvfrom(sockfd,
                                                 (char *)buffer, buffer_size, 0,
                                                 (struct sockaddr *)&server, &addr_len);
 

@@ -113,7 +113,6 @@ mm_union_free_blocks(block_meta_data_t *first,
 void
 allocator_init (void *base_address, uint32_t size) {
 
-
     vm_page_hdr_t *vm_page_hdr = (vm_page_hdr_t *)base_address;
     vm_page_hdr->page_size = size;
     vm_page_hdr->block.is_free = true;
@@ -134,7 +133,6 @@ allocator_split_free_data_block_for_allocation (
             block_meta_data_t *block_meta_data,
             uint32_t size){
 
-    uint32_t old_block_size = block_meta_data->block_size;
     block_meta_data_t *next_block_meta_data = NULL;
 
     assert(block_meta_data->is_free);
@@ -174,16 +172,6 @@ allocator_split_free_data_block_for_allocation (
         next_block_meta_data);
     mm_bind_blocks_for_allocation(block_meta_data, next_block_meta_data);
     return true;
-
-#if 0
-    /* revert changes */
-    block_meta_data->is_free = true;
-    block_meta_data->block_size = old_block_size;
-    allocator_add_block_to_free_block_list(
-                &vm_page->free_block_pq_head,
-                block_meta_data);
-    return false;
-    #endif
 }
 
 void *
