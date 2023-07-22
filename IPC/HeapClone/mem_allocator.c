@@ -85,7 +85,7 @@ allocator_add_block_to_free_block_list (
         return;
     }
 
-    allocator_add_block_before_current_block(prev_block, block_to_add);
+    allocator_add_block_after_current_block(prev_block, block_to_add);
 }
 
 static block_meta_data_t *
@@ -301,7 +301,7 @@ allocator_print_vm_page (void *base_address) {
 
 }
 
-#if 0
+#if 1
 int
 main(int argc, char **argv) {
 
@@ -311,7 +311,9 @@ main(int argc, char **argv) {
     void *ptr1 = allocator_alloc_mem(base_address, 48);
     void *ptr2 = allocator_alloc_mem(base_address, 98);
     allocator_free_mem(ptr1);
+    void *ptr3 = allocator_alloc_mem(base_address, 198);
     allocator_free_mem(ptr2);
+    allocator_free_mem(ptr3);
     assert(allocator_is_vm_page_empty(base_address));
     free(base_address);
     return 0;
